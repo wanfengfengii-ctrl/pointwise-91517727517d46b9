@@ -1,0 +1,10 @@
+{
+  "track": "bench-07",
+  "frames": [
+    {"number": 1, "raw": "[\"A\", 10, 2]", "origin": {"export": "bench-07.run", "locator": "row/1"}},
+    {"number": 2, "raw": "[\"D\",1]", "origin": {"export": "bench-07.run", "locator": "row/2"}},
+    {"number": 3, "raw": "[\"D\",0]", "origin": {"export": "bench-07.run", "locator": "row/3"}},
+    {"number": 4, "raw": "[\"A\",8,0]", "origin": {"export": "bench-07.run", "locator": "row/4"}},
+    {"number": 5, "raw": "[\"D\",0]", "origin": {"export": "bench-07.run", "locator": "row/5"}}
+  ]
+}
