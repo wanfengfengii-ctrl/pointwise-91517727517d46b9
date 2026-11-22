@@ -1,9 +1,10 @@
 """Run this project's full unittest suite from the repository root."""
 import sys
+import traceback
 import unittest
 
 
-def main():
+def run_suite() -> int:
     suite = unittest.defaultTestLoader.discover('tests', top_level_dir='.')
     if suite.countTestCases():
         result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -24,6 +25,29 @@ def main():
           f'unexpected_successes={len(result.unexpectedSuccesses)} '
           f'result={"PASS" if successful else "FAIL"}')
     return 0 if successful else 1
+
+
+def run_examples() -> int:
+    import anchor_examples
+    for label, check in (
+        ('v1', anchor_examples.v1_examples),
+        ('review', anchor_examples.review_examples),
+    ):
+        try:
+            check()
+        except Exception:
+            print(f'EXAMPLE CHECK FAILED: anchor_examples {label}', file=sys.stderr)
+            traceback.print_exc()
+            return 1
+    print('EXAMPLE SUMMARY cases=v1,review result=PASS')
+    return 0
+
+
+def main():
+    status = run_suite()
+    if status:
+        return status
+    return run_examples()
 
 
 if __name__ == '__main__':

@@ -31,9 +31,10 @@ def fixture_bytes(name: str) -> bytes:
     return (FIXTURES / name).read_bytes()
 
 
-def seal_payload(payload: dict[str, object]) -> bytes:
+def seal_payload(payload: dict[str, object], version: int = 1) -> bytes:
     body = json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
-    archive = {'version': 1, 'payload': payload, 'sha256': hashlib.sha256(body.encode('ascii')).hexdigest()}
+    archive = {'version': version, 'payload': payload,
+               'sha256': hashlib.sha256(body.encode('ascii')).hexdigest()}
     return json.dumps(archive, ensure_ascii=True).encode('ascii')
 
 
@@ -70,4 +71,10 @@ class ArchiveTests(unittest.TestCase):
             '''SELECT (SELECT count(*) FROM intakes),
                       (SELECT count(*) FROM findings),
                       (SELECT count(*) FROM finding_receipts)'''
+        ).fetchone()
+
+    def review_counts(self, connection):
+        return connection.execute(
+            '''SELECT (SELECT count(*) FROM review_findings),
+                      (SELECT count(*) FROM review_finding_receipts)'''
         ).fetchone()

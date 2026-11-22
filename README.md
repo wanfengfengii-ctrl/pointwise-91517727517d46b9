@@ -9,6 +9,7 @@
 ```text
 python3 -B check_project.py
 python3 -B -m handoff_demo
+python3 -B -m anchor_examples --review
 ```
 
 回归使用临时 SQLite 库，覆盖有符号读数、前置缺测、父版检查、重开初始化、固定件补发、独立来件、旧件、错界拒收、失败回滚及历史领取。演示实际导入样例并提交勘误，关闭源库后读取第 1、3、5 帧，签存报告后重开领取。样例整轨读数为 10、13、16、8、8，勘误后为 11、14、17、8、8。旧修订的复读结果为 10、16、8，有效帧数为 3，峰值为 16。
@@ -38,3 +39,9 @@ python3 -B -m handoff_demo
 无效轨道结构、过时或跨轨父版、无效选帧、外层失配、缺证和错界来件报 `ValueError`。未知修订、件号、实收号或定稿号报 `LookupError`。数据库写入失败传播 SQLite 异常。发行和报告只在提交后返回成功回执。报告和回执同次提交，失败后可按原号继续领取旧成果。
 
 `fixtures/bench-export.json` 是五帧设备导出，`fixtures/night-handoff.json` 可直接离线实收，`fixtures/legacy-handoff.json` 是可独立重解的旧件。系统处理单轨整数采样，产品范围限于本地采集档案与同版离线复核。
+
+## 复核件（V2）
+
+夜班复核误记锚点时，`issue.register.dispatch_review` 按 V1 选帧规则发行 `version` 为整数 2 的固定件，`issue.register.copy` 对两个版本均可按件号补发原字节和原回执。源库关闭后，`receive.intake.accept_review` 仅凭 V2 字节验封登记；`report.publish.publish_review` 按实收号和指令字典签存复核定稿；`report.lookup.fetch_review` 重开后按定稿号领取定稿和原回执。复核定稿与回执存于 `review_findings`、`review_finding_receipts`，与 V1 表互不干扰，初始化沿用 `report.store.initialize_reports`。
+
+V2 载荷在 V1 字段外携带 `basis` 复核依据：按原序列出每个未选帧的派生帧形——`["A", 值, 差分]`、`["D", 增量]` 或 `["M"]`，整数为规范十进制字符串。发行方由冻结原轨逐帧解码生成；实收方核验依据条目与选位恰好不重不漏地拼成 1..N 整轨，把所选原帧解码合并后确认空指令下整轨可解码。省略帧的原编码、逐帧读数和逐帧出处留在源站。指令字典的键为所选原锚点的整数原位，值为 `(读数, 差分)` 整数元组或 `None`（缺测）；各指令同时作用于冻结原轨，重解后任一差分先于首个剩余有效锚点即整次拒签，全轨缺测合法。
